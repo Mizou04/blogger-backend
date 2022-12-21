@@ -1,11 +1,12 @@
 import {v4 as UUID4} from "uuid"
 
-export default class UID{
-  constructor(public value? : any){
+
+export default class UID {
+  constructor(public value? : string){
     this.value = value ? value : UUID4().replace(/-/g, "");
   }
 
   toString(){
-    return JSON.stringify(this);
+    return this.value?.toString();
   }
 }

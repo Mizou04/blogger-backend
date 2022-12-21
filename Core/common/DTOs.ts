@@ -18,5 +18,5 @@ export type CommandDTO<T> = {
    * @param id  if we need to update/delete existing one(s)
    */
   id?: UID | UID[],
-  payload: T
+  payload: Partial<T>
 }

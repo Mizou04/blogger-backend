@@ -9,7 +9,7 @@ import UID from "../common/UID";
 type AuthorMin = {
   readonly id : UID;
   readonly props : {
-    [k in keyof Omit<AuthorProps, "name" | "photo" | "joined">] : AuthorProps[k];
+    [k in keyof Pick<AuthorProps, "name" | "photo" | "joined">] : AuthorProps[k];
   }
 }
 
@@ -27,8 +27,9 @@ export type PostProps = {
 
 
 export default class Post extends Entity<PostProps>{
-  private constructor(props : PostProps, id: UID){
+  private constructor(public props : PostProps, public id: UID){
     super(props, id);
+    this.id = id;
   }
 
   static create(props : PostProps, id : UID) : Post{

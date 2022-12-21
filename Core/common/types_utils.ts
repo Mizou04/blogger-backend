@@ -1,5 +1,4 @@
 import Entity from "./BaseEntity";
-import UID from "./UID";
 
 /* 
   The goal is to transform an entity to a raw strings data
@@ -29,6 +28,6 @@ export type EntityToRaw<T> = T extends Entity<infer props>
   {
     [key in keyof props] : props[key] extends any[] ? string[] : string
   }
-: string
+: never
 
 

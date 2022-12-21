@@ -1,5 +1,6 @@
 node_modules/*
-[Pp]ersistence/*
 tst.js
 [Mm]ocks/*
 *-lock.json
+Persistence/mockDB.ts
+.env

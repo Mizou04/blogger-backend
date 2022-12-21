@@ -1,0 +1,1 @@
+export {default as PostDB} from "./postMongo"
