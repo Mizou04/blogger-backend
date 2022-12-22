@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import {IAuthorDBGateway} from "../../../Core/Author/IDBGateway"
 import { QueryDTO } from "../../../Core/common/DTOs";
 import { RawAuthor } from "../../../Core/Author/rawAuthor";
+import { InvalidInputError } from "../../../Core/common/Errors";
 
 export default class AuthorMongo implements IAuthorDBGateway{
   private db = mongoose;
@@ -18,7 +19,9 @@ export default class AuthorMongo implements IAuthorDBGateway{
   private collection = "Authors";
   private Model = this.db.model(this.collection, this.schema, this.collection);
 
-  getAuthor(params: QueryDTO): Promise<Partial<RawAuthor> | null | undefined> {
-    throw new Error("Method not implemented.");
+  async getAuthor(params: QueryDTO): Promise<Partial<RawAuthor> | null | undefined> {
+    if(params.id && Array.isArray(params.id)) throw new InvalidInputError("too much arguments " + params.id.map(i => i.toString()).join(" "));
+    let res = await this.Model.findOne({id : params.id?.toString()}).exec();
+    return res;
   }
 }

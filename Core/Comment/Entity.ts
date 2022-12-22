@@ -15,8 +15,10 @@ type CommentProps = {
 }
 
 export default class Comment extends Entity<CommentProps>{
-  private constructor(props : CommentProps, id : UID){
+  private constructor(public props : CommentProps, public id : UID){
     super(props, id);
+    this.props = props;
+    this.id = id;
   }
 
   static create(props : CommentProps, id : UID) : Comment{

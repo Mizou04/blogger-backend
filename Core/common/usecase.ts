@@ -4,5 +4,5 @@ export interface InputPort<INPUT>{
 }
 
 export interface OutputPort<INPUT>{
-  present(input : INPUT) : any
+  present(input : INPUT) : unknown
 }

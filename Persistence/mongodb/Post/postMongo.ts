@@ -27,8 +27,8 @@ export default class PostMongo implements IPostDBGateway{
       throw new DBError("too many arguments [" + query.id.join(",") + "]");
     }
     if(!query.id) throw new DBError("you better give an ID or use getPosts instead");
-    let projection = query.select && query.select.length ? query.select.join(" ") : " ";
-    let result = await this.Model.findOne({id : query.id}, projection.concat(" -_id"));
+    let projection = query.select && query.select.join(" ");
+    let result = await this.Model.findOne({id : query.id.toString()}, projection);
     return result?.toObject();
   }
 

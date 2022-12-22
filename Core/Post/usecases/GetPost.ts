@@ -4,14 +4,14 @@ import Post from "../Entity";
 import { EXCEPTIONS } from "../Errors";
 import IPostDBGateway from "../IDBGateway";
 import { IAuthorDBGateway } from "../../Author/IDBGateway";
-import { ICommentDBGateway, StoredComment } from "../../Comment/IDBGateway";
+import { ICommentDBGateway, RawComment } from "../../Comment/IDBGateway";
 import Comment from "../../Comment/Entity";
 import { RawAuthor } from "../../Author/rawAuthor";
 import Like from "../../Like";
 
-export default class GetPost implements InputPort<{id : UID}>{
+export default class GetPost implements InputPort<{id : string}>{
   constructor(
-    public outputPort : GetPostPresenter, 
+    public outputPort : IGetPostPresenter, 
     public postDBGateway : IPostDBGateway,
     public commentDBGateway : ICommentDBGateway,
     public authorDBGateway : IAuthorDBGateway
@@ -21,12 +21,13 @@ export default class GetPost implements InputPort<{id : UID}>{
     this.authorDBGateway = authorDBGateway;
     this.commentDBGateway = commentDBGateway
   }
-  async execute(params: {id : UID}){
-    let storedPost = await this.postDBGateway.getPost(params);
-    let storedComments = await this.commentDBGateway.getComments(params.id);
+  async execute(params: {id : string}){
+    
+    let storedPost = await this.postDBGateway.getPost({...params, id : new UID(params.id)});
+    let storedComments = await this.commentDBGateway.getComments(new UID(params.id));
     let storedAuthor = await this.getAuthorByID(storedPost?.author as string);
-    console.log(storedAuthor?.joined)
-    let comments : Comment[] = await Promise.all((storedComments as StoredComment[]).map(async (strdCmnt)=>{
+
+    let comments : Comment[] = await Promise.all((storedComments as RawComment[]).map(async (strdCmnt)=>{
       let storedCommentAuthor = await this.getAuthorByID(strdCmnt.author);
       let commentAuthor = {
         props : {
@@ -53,15 +54,16 @@ export default class GetPost implements InputPort<{id : UID}>{
       },
         new UID(storedPost?.id)
       )
-    let data = {
+
+    let data = { // DTO
       ...post.props,
+      id : post.id.toString(),
       lastModified : post.props.lastModified.toString(),
       author : {
         ...author.props,
         id : post.props.author.id.toString() as string,
         joined : author.props.joined.toString(),
       },
-      id : post.id.toString(),
       comments : comments.map((comment)=>{
         return {...comment.props, id : comment.id?.toString(), author : {
           ...author.props,
@@ -86,12 +88,10 @@ export default class GetPost implements InputPort<{id : UID}>{
     return likes.map((like) => new Like(new UID(like)))
   }
 
-  private async getCommentsByPostID(postID : UID) : Promise<StoredComment[] | null> {
+  private async getCommentsByPostID(postID : UID) : Promise<RawComment[] | null> {
     let storedComments = await this.commentDBGateway.getComments(postID);
     return storedComments
   }
 }
 
-export interface GetPostPresenter extends OutputPort<any>{
-  
-}
+export interface IGetPostPresenter extends OutputPort<unknown>{}
