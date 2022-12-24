@@ -94,4 +94,4 @@ export default class GetPost implements InputPort<{id : string}>{
   }
 }
 
-export interface IGetPostPresenter extends OutputPort<unknown>{}
+export interface IGetPostPresenter extends OutputPort<any>{}

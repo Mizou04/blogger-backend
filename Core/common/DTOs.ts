@@ -2,17 +2,16 @@ import UID from "./UID"
 /**
  * for querying a `Element` or `Elements`
  */
-export type QueryDTO = {
+export type QueryDTO<T = string> = {
   id?: UID | UID[] // get elements by their IDs
-  select?: string[];
-  where?: string | string[]
+  select?: T extends Record<string | number | symbol, any> ? (keyof T)[] : string;
+  where?: string[]
   count?: number
 }
 
 /**
  * for creating or updating Element
  */
-
 export type CommandDTO<T> = {
   /**
    * @param id  if we need to update/delete existing one(s)
