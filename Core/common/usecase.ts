@@ -3,6 +3,6 @@ export interface InputPort<INPUT>{
   execute(params : INPUT) : any
 }
 
-export interface OutputPort<INPUT>{
-  present(input : INPUT) : unknown
+export interface OutputPort<OUTPUT>{
+  present(input : any) : OUTPUT
 }

@@ -11,7 +11,7 @@ import { RawPost } from "../rawPost";
 
 export default class SetPost implements InputPort<PostCommandDTO>{
   constructor(
-    public outputPort: OutputPort<boolean>,
+    public outputPort: OutputPort<"success" | "failure">,
     public postGatway : IPostDBGateway,
     public authorGateway : IAuthorDBGateway
     ){
