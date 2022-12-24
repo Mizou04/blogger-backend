@@ -4,7 +4,7 @@ import UID from "./UID"
  */
 export type QueryDTO<T = string> = {
   id?: UID | UID[] // get elements by their IDs
-  select?: T extends Record<string | number | symbol, string> ? (keyof T)[] : string;
+  select?: T extends Record<string | number | symbol, any> ? (keyof T)[] : string;
   where?: string[]
   count?: number
 }
