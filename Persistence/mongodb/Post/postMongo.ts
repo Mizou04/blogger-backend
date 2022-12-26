@@ -36,15 +36,25 @@ export default class PostMongo implements IPostDBGateway{
     // if 'where' clause return 'count' posts with conditional
     if(query.where){
       if(query.where[1] == "="){
-        return await this.Model.find({[query.where[0]] : {$regex : new RegExp(query.where[2], "igm")}}, query.select).sort({_id : -1}).limit(query.count ?? 10);
+        return await this.Model.find({[query.where[0]] : {$regex : new RegExp(query.where[2], "igm")}}, query.select)
+          .sort({_id : -1})
+          .limit(query?.count ?? 10)
+          .exec();
       } else {
         throw new DBError(`query ${query.where[1]} not implemented yet`);
       }
     } 
     // if 'ids' clause return posts with 'ids'
-    if(query.id) return await this.Model.find({id : {$in : query.id.toString()}}, query.select).exec();
+    if(query.id) 
+      return await this.Model
+      .find({id : {$in : query.id.toString()}}, query.select)
+      .exec();
     // if 'count' only return last 'count' posts
-    if(!query.id) return await this.Model.find({}, query.select).sort({_id : -1}).limit(query.count ?? 10).exec();
+    if(!query.id) 
+      return await this.Model.find({}, query.select)
+      .sort({_id : -1})
+      .limit(query.count ?? 10)
+      .exec();
     throw new Error("Method not implemented.");
   }
   async setPost(command: PostCommandDTO): Promise<boolean> {
