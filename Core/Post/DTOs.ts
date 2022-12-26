@@ -12,5 +12,3 @@ export type PostQueryDTO = QueryDTO<RawPost>
 
 export type PostCommandDTO = CommandDTO<RawPost>
 
-
-

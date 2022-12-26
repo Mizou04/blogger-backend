@@ -8,6 +8,7 @@ import { ICommentDBGateway, RawComment } from "../../Comment/IDBGateway";
 import Comment from "../../Comment/Entity";
 import { RawAuthor } from "../../Author/rawAuthor";
 import Like from "../../Like";
+import { QueryDTO } from "../../common/DTOs";
 
 export default class GetPost implements InputPort<{id : string}>{
   constructor(
@@ -79,8 +80,8 @@ export default class GetPost implements InputPort<{id : string}>{
   }
 
   private async getAuthorByID(id : string) : Promise<Partial<RawAuthor> | undefined | null>{
-    let select = ["id", "name", "photo", "joined"];
-    let storedAuthor = await this.authorDBGateway.getAuthor({select, id : new UID(id)});
+    let select : QueryDTO<RawAuthor>["select"] = ["id", "name", "photo", "joined"];
+    let storedAuthor = await this.authorDBGateway.getAuthor({id : new UID(id), select});
     return storedAuthor;
   }
 

@@ -22,7 +22,7 @@ export default class PostMongo implements IPostDBGateway{
   private schema = new this.db.Schema<RawPost>(this.postSchema);
   private Model = this.db.model(this.collection, this.schema, this.collection)
   
-  async getPost(query: QueryDTO): Promise<Partial<RawPost> | undefined> {
+  async getPost(query: QueryDTO<RawPost>): Promise<Partial<RawPost> | undefined> {
     if(Array.isArray(query.id)){
       throw new DBError("too many arguments [" + query.id.join(",") + "]");
     }
@@ -32,7 +32,19 @@ export default class PostMongo implements IPostDBGateway{
     return result?.toObject();
   }
 
-  async getPosts(query: QueryDTO): Promise<Partial<RawPost>[] | undefined> {
+  async getPosts(query: QueryDTO<RawPost>): Promise<Partial<RawPost>[] | undefined> {
+    // if 'where' clause return 'count' posts with conditional
+    if(query.where){
+      if(query.where[1] == "="){
+        return await this.Model.find({[query.where[0]] : {$regex : new RegExp(query.where[2], "igm")}}, query.select).sort({_id : -1}).limit(query.count ?? 10);
+      } else {
+        throw new DBError(`query ${query.where[1]} not implemented yet`);
+      }
+    } 
+    // if 'ids' clause return posts with 'ids'
+    if(query.id) return await this.Model.find({id : {$in : query.id.toString()}}, query.select).exec();
+    // if 'count' only return last 'count' posts
+    if(!query.id) return await this.Model.find({}, query.select).sort({_id : -1}).limit(query.count ?? 10).exec();
     throw new Error("Method not implemented.");
   }
   async setPost(command: PostCommandDTO): Promise<boolean> {

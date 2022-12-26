@@ -44,7 +44,7 @@ export default class SetPost implements InputPort<PostCommandDTO>{
     thumbnail : payload?.thumbnail as string,
     title : payload?.title as string
     }, id as UID);
-    let result = await this.postGatway.setPost({id : post.id, payload : {...post.props, createdAt : post.props.createdAt.toString(), lastModified : post.props.lastModified.toString(), author : post.props.author.id.toString(), likes : []}});    
+    let result = await this.postGatway.setPost({id : post.id, payload : {...post.props, comments : [], createdAt : post.props.createdAt.toString(), lastModified : post.props.lastModified.toString(), author : post.props.author.id.toString(), likes : []}});    
     return this.outputPort.present(result);
   }
 }

@@ -3,11 +3,13 @@ import { ICommentDBGateway, RawComment } from "../Core/Comment/IDBGateway";
 import { QueryDTO } from "../Core/common/DTOs";
 import UID from "../Core/common/UID";
 import GetPost from "../Core/Post/usecases/GetPost";
+import GetPosts from "../Core/Post/usecases/GetPosts";
 import SetPost from "../Core/Post/usecases/SetPost";
 import  MockPostDB  from "../Persistence/mockDB";
 import { st_authors } from "../mocks";
 import { RawPost } from "../Core/Post/rawPost";
 import { RawAuthor } from "../Core/Author/rawAuthor";
+import { PostQueryDTO } from "../Core/Post/DTOs";
 
 
 let postDB = new MockPostDB();
@@ -21,18 +23,19 @@ let commentDB : ICommentDBGateway = {
 }
 
 let authorDB : IAuthorDBGateway = {
-  async getAuthor({id : parID, select}: QueryDTO): Promise<Partial<RawAuthor>> {
-    return st_authors.find(({id}) => id == (parID as UID).value) as RawAuthor;
+  async getAuthor({ id: parID, select }: QueryDTO<RawAuthor>): Promise<Partial<RawAuthor>> {
+    return st_authors.find(({ id }) => id == (parID as UID).value) as RawAuthor;
 
+  },
+  async getAuthors(params: QueryDTO<RawAuthor>) {
+    return st_authors
+    // throw new Error("Function not implemented.");
   }
 }
 
 let getPost = new GetPost({present(input){ return input }}, postDB, commentDB, authorDB);
 let setPost = new SetPost({present(input){ return input ? "success" : "failure" } }, postDB, authorDB);
-let getPosts = {
-  async execute(query : QueryDTO){
-  return [{author : {name : "Joe"}}, {author : {name : "Joe"}}];
-}};
+let getPosts = new GetPosts({present(input){return input}}, postDB, authorDB);
 
 let fakeValidPost : RawPost = {
   author: "a123",
@@ -44,6 +47,7 @@ let fakeValidPost : RawPost = {
   thumbnail: "#85a111",
   description: "a very fucked one",
   likes: [],
+  comments: [],
   createdAt: new Date(Date.now()-200000).toString(),
   lastModified: new Date(Date.now() - 5000).toString()
 }
@@ -63,14 +67,19 @@ describe("set Post use case", ()=>{
 })
 let count = 2;
 describe("get Posts usecase", ()=>{
-  test(`should return ${count} of posts`, async ()=>{
-    let res = await getPosts.execute({count} as QueryDTO);
-    expect(res.length).toBe(count);
+  test(`should return number of posts`, async ()=>{
+    let res = await getPosts.execute({count} as PostQueryDTO);
+    expect(res?.length).toBeGreaterThanOrEqual(0);
   })
-  test(`should return posts based on condition`, async ()=>{
-    let res = await getPosts.execute({where : ["author.name", "=", "Joe"]} as QueryDTO);
-    for(let post of res){
-      expect(post.author.name).toBe("Joe");
-    }
+  test(`should return posts of an author`, async ()=>{
+    let res = await getPosts.execute({id : [new UID("p123"), new UID("p124")]});
+      expect(res![0]?.author.name).toBe("beast");
   })
+  // test(`should return posts based on condition`, async ()=>{
+  //   let res = await getPosts.execute({where : ["author", "=", "a123"]});
+  //   if(res) for(let post of res){
+  //     console.log(post);
+  //     expect(post?.author.name).toBe("beast");
+  //   }
+  // })
 })

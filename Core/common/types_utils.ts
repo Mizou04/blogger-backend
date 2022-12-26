@@ -26,7 +26,7 @@ export type EntityToRaw<T> = T extends Entity<infer props>
 ? 
   {id : string} & 
   {
-    [key in keyof props] : props[key] extends any[] ? string[] : string
+    -readonly [key in keyof props]?: props[key] extends any[] ? string[] : string
   }
 : never
 
