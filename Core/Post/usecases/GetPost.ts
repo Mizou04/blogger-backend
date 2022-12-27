@@ -9,6 +9,7 @@ import Comment from "../../Comment/Entity";
 import { RawAuthor } from "../../Author/rawAuthor";
 import Like from "../../Like";
 import { QueryDTO } from "../../common/DTOs";
+import { RawPost } from "../rawPost";
 
 export default class GetPost implements InputPort<{id : string}>{
   constructor(
@@ -26,10 +27,10 @@ export default class GetPost implements InputPort<{id : string}>{
     
     let post = await this.postDBGateway.getPost({...params, id : new UID(params.id)});
     let st_comments = await this.commentDBGateway.getComments(new UID(params.id));
-    let author = await this.getAuthorByID(post?.author as string);
+    let author = await this.getAuthorByID(post?.author as string) as Partial<RawAuthor>;
 
-    let comments : any[] = await Promise.all((st_comments as RawComment[]).map(async (strdCmnt)=>{
-      let storedCommentAuthor = await this.getAuthorByID(strdCmnt.author);
+    let comments : (Omit<RawComment, "author"> & {author?: RawAuthor})[] = await Promise.all((st_comments as RawComment[]).map(async (strdCmnt)=>{
+      let storedCommentAuthor = await this.getAuthorByID(strdCmnt?.author!);
       
       return {id : strdCmnt.id, postID : post?.id as string, value : strdCmnt.value, author : storedCommentAuthor};
     }))
@@ -46,7 +47,7 @@ export default class GetPost implements InputPort<{id : string}>{
 
   }
 
-  private async getAuthorByID(id : string) : Promise<Partial<RawAuthor> | undefined | null>{
+  private async getAuthorByID(id : string) : Promise<Partial<RawAuthor> | undefined>{
     let select : QueryDTO<RawAuthor>["select"] = ["id", "name", "photo", "joined"];
     let author = await this.authorDBGateway.getAuthor({id : new UID(id), select});
     return author;
@@ -62,4 +63,4 @@ export default class GetPost implements InputPort<{id : string}>{
   }
 }
 
-export interface IGetPostPresenter extends OutputPort<any>{}
+export interface IGetPostPresenter extends OutputPort<Omit<RawPost, "author" | "comments"> & {author : RawAuthor} & {comments : (Omit<RawComment, "author"> & {author?: RawAuthor})[]}>{}

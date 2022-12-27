@@ -1,7 +1,7 @@
-import { QueryDTO } from "../common/DTOs";
+import { AuthorQueryDTO } from "./DTOs";
 import { RawAuthor } from "./rawAuthor";
 
 export interface IAuthorDBGateway{
-  getAuthor(params : QueryDTO<RawAuthor>) : Promise<Partial<RawAuthor> | undefined | null>
-  getAuthors(params : QueryDTO<RawAuthor>) : Promise<Partial<RawAuthor>[] | undefined | null>
+  getAuthor(params : AuthorQueryDTO) : Promise<Partial<RawAuthor> | undefined>
+  getAuthors(params : AuthorQueryDTO) : Promise<Partial<RawAuthor>[] | undefined | null>
 }

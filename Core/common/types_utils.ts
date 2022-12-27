@@ -24,7 +24,7 @@ import Entity from "./BaseEntity";
 
 export type EntityToRaw<T> = T extends Entity<infer props> 
 ? 
-  {id : string} & 
+  {id?: string} & 
   {
     -readonly [key in keyof props]?: props[key] extends any[] ? string[] : string
   }

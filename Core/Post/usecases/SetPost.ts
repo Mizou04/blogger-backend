@@ -5,13 +5,11 @@ import { IAuthorDBGateway } from "../../Author/IDBGateway";
 import { ICommentDBGateway } from "../../Comment/IDBGateway";
 import Post from "../Entity";
 import UID from "../../common/UID";
-import Author from "../../Author/Entity";
-import { RawPost } from "../rawPost";
 
 
 export default class SetPost implements InputPort<PostCommandDTO>{
   constructor(
-    public outputPort: OutputPort<"success" | "failure">,
+    public outputPort: SetPostOutputPort,
     public postGatway : IPostDBGateway,
     public authorGateway : IAuthorDBGateway
     ){
@@ -48,3 +46,6 @@ export default class SetPost implements InputPort<PostCommandDTO>{
     return this.outputPort.present(result);
   }
 }
+
+
+export interface SetPostOutputPort extends OutputPort<"success" | "failure">{}
