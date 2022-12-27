@@ -1,5 +1,5 @@
 import { IGetAuthorInputPort } from "../../../Core/Author/usecases/GetAuthor";
-import { InvalidInputError } from "../../../Core/common/Errors";
+import { DBError, InvalidInputError } from "../../../Core/common/Errors";
 import BaseController from "../base.controller";
 
 export default class GetAuthorController extends BaseController{
@@ -14,8 +14,8 @@ export default class GetAuthorController extends BaseController{
       let author = await this.getAuthorUseCase.execute({id});
       if(author){
         return this.res?.status(200).json(author)
-      }    
-      throw new Error("Internal Error")
+      } 
+      throw new DBError("page not found")
     } catch (error) {
       error instanceof Error && this.next!(error)
     }

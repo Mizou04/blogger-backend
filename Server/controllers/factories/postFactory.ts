@@ -1,11 +1,7 @@
 import GetPost from "../../../Core/Post/usecases/GetPost";
 import GetPostPresenter from "../../presenters/Post/getpost.presenter";
 import GetPostController from "../Post/getPost.controller";
-import {PostDB, AuthorDB, CommentDB} from "../../../Persistence/index"
-
-let postDB = new PostDB();
-let authorDB = new AuthorDB();
-let commentDB = new CommentDB();
+import {postDB, commentDB, authorDB} from "./common/dbs"
 
 export default class PostControllersFactory {
   

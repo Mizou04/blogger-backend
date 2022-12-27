@@ -3,8 +3,10 @@ import cors from "cors"
 import helmet from "helmet";
 import { DBError, InvalidInputError } from "../Core/common/Errors";
 import { postControllers } from "./controllers/factories";
+import authorControllers from "./controllers/factories/authorFactory";
 
 let {getPostController} = postControllers;
+let {getAuthorController} = authorControllers;
 
 let app = express();
 
@@ -33,7 +35,7 @@ let api = express.Router();
 })
  */
 api.get("/posts/:id", async (req, res, next) => getPostController().execute(req, res, next))
-
+api.get("/authors/:id", async (req, res, next) => getAuthorController().execute(req, res, next))
 app.use("/api", api);
 
 //basic error middleware
