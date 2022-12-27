@@ -13,6 +13,12 @@ export default class PostMongo implements IPostDBGateway{
     author: String,
     thumbnail: String,
     likes: [String],
+    comments : [{
+      id : String,
+      postId : String,
+      author : String,
+      value : String
+    }],
     createdAt: String,
     lastModified: String,
     id: String
@@ -29,7 +35,8 @@ export default class PostMongo implements IPostDBGateway{
     if(!query.id) throw new DBError("you better give an ID or use getPosts instead");
     let projection = query.select && query.select.join(" ");
     let result = await this.Model.findOne({id : query.id.toString()}, projection);
-    return result?.toObject();
+    if(!result) return undefined;
+    return result.toObject();
   }
 
   async getPosts(query: QueryDTO<RawPost>): Promise<Partial<RawPost>[] | undefined> {
