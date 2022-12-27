@@ -24,65 +24,32 @@ export default class GetPost implements InputPort<{id : string}>{
   }
   async execute(params: {id : string}){
     
-    let storedPost = await this.postDBGateway.getPost({...params, id : new UID(params.id)});
-    let storedComments = await this.commentDBGateway.getComments(new UID(params.id));
-    let storedAuthor = await this.getAuthorByID(storedPost?.author as string);
+    let post = await this.postDBGateway.getPost({...params, id : new UID(params.id)});
+    let st_comments = await this.commentDBGateway.getComments(new UID(params.id));
+    let author = await this.getAuthorByID(post?.author as string);
 
-    let comments : Comment[] = await Promise.all((storedComments as RawComment[]).map(async (strdCmnt)=>{
+    let comments : any[] = await Promise.all((st_comments as RawComment[]).map(async (strdCmnt)=>{
       let storedCommentAuthor = await this.getAuthorByID(strdCmnt.author);
-      let commentAuthor = {
-        props : {
-          joined : new Date(storedCommentAuthor?.joined as string),
-          name : storedCommentAuthor?.name + "",
-          photo : storedCommentAuthor?.photo + ""
-        },
-        id : new UID(storedCommentAuthor?.id)
-      };
-      return Comment.create({postID : new UID(storedPost?.id), value : strdCmnt.value, author : commentAuthor}, new UID(strdCmnt.id));
+      
+      return {id : strdCmnt.id, postID : post?.id as string, value : strdCmnt.value, author : storedCommentAuthor};
     }))
-    let author = {props : {joined : new Date(storedAuthor?.joined + ""), name : storedAuthor?.name + "", photo : storedAuthor?.photo + ""}, id : new UID(storedAuthor?.id)};
 
-    let post = Post.create({
-        author : author,
-        comments : comments || [],
-        createdAt : new Date(storedPost?.createdAt + ""),
-        content : storedPost?.content + "",
-        description : storedPost?.description + "",
-        lastModified : new Date(storedPost?.lastModified + ""),
-        likes : this.getLikes(storedPost?.likes as string[]) || [],
-        thumbnail : storedPost?.thumbnail + "",
-        title : storedPost?.title + "",
-      },
-        new UID(storedPost?.id)
-      )
-
-    let data = { // DTO
-      ...post.props,
-      id : post.id.toString(),
-      lastModified : post.props.lastModified.toString(),
-      author : {
-        ...author.props,
-        id : post.props.author.id.toString() as string,
-        joined : author.props.joined.toString(),
-      },
-      comments : comments.map((comment)=>{
-        return {...comment.props, id : comment.id?.toString(), author : {
-          ...author.props,
-          id : post.props.author.id.toString() as string,
-          joined : author.props.joined.toString(),
-          postID : comment.props.postID.toString() as string
-        }}
-      })
+    if(post && post.id){
+      let data = { // DTO
+        ...post,
+        author,
+        comments
+      }
+      // WE SHOULD NOT PASS <ENTITIES> instead of <DATA STRUCTURES>
+      return this.outputPort.present(data);
     }
-    // WE SHOULD NOT PASS <ENTITIES> instead of <DATA STRUCTURES>
-    return this.outputPort.present(data);
 
   }
 
   private async getAuthorByID(id : string) : Promise<Partial<RawAuthor> | undefined | null>{
     let select : QueryDTO<RawAuthor>["select"] = ["id", "name", "photo", "joined"];
-    let storedAuthor = await this.authorDBGateway.getAuthor({id : new UID(id), select});
-    return storedAuthor;
+    let author = await this.authorDBGateway.getAuthor({id : new UID(id), select});
+    return author;
   }
 
   private getLikes(likes : string[]){
@@ -90,8 +57,8 @@ export default class GetPost implements InputPort<{id : string}>{
   }
 
   private async getCommentsByPostID(postID : UID) : Promise<RawComment[] | null> {
-    let storedComments = await this.commentDBGateway.getComments(postID);
-    return storedComments
+    let comments = await this.commentDBGateway.getComments(postID);
+    return comments
   }
 }
 
