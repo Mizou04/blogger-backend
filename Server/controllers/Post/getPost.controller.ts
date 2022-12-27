@@ -1,6 +1,6 @@
-import BaseController from "./base.controller";
-import GetPostInputPort from "../../Core/Post/usecases/GetPost"
-import { InvalidInputError } from "../../Core/common/Errors";
+import BaseController from "../base.controller";
+import GetPostInputPort from "../../../Core/Post/usecases/GetPost"
+import { InvalidInputError } from "../../../Core/common/Errors";
 
 
 export default class GetPostController extends BaseController{

@@ -1,6 +1,6 @@
 import GetPost from "../../../Core/Post/usecases/GetPost";
 import GetPostPresenter from "../../presenters/getpost.presenter";
-import GetPostController from "../getPost.controller";
+import GetPostController from "../Post/getPost.controller";
 import {PostDB, AuthorDB, CommentDB} from "../../../Persistence/index"
 
 let postDB = new PostDB();
