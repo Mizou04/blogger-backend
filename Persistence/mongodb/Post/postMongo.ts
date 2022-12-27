@@ -4,6 +4,7 @@ import IPostDBGateway from "../../../Core/Post/IDBGateway"
 import { RawPost } from "../../../Core/Post/rawPost";
 import { QueryDTO } from "../../../Core/common/DTOs";
 import { DBError } from "../../../Core/common/Errors";
+import { extractProjectionFromArrayOfStringsAndExclude_id } from "../helpers";
 
 export default class PostMongo implements IPostDBGateway{
   private postSchema = {
@@ -33,17 +34,20 @@ export default class PostMongo implements IPostDBGateway{
       throw new DBError("too many arguments [" + query.id.join(",") + "]");
     }
     if(!query.id) throw new DBError("you better give an ID or use getPosts instead");
-    let projection = query.select && query.select.join(" ");
+    
+    let projection = extractProjectionFromArrayOfStringsAndExclude_id(query.select)
+
     let result = await this.Model.findOne({id : query.id.toString()}, projection);
     if(!result) return undefined;
     return result.toObject();
   }
 
   async getPosts(query: QueryDTO<RawPost>): Promise<Partial<RawPost>[] | undefined> {
+    let projection = extractProjectionFromArrayOfStringsAndExclude_id(query.select)
     // if 'where' clause return 'count' posts with conditional
     if(query.where){
       if(query.where[1] == "="){
-        return await this.Model.find({[query.where[0]] : {$regex : new RegExp(query.where[2], "igm")}}, query.select)
+        return await this.Model.find({[query.where[0]] : {$regex : new RegExp(query.where[2], "igm")}}, projection)
           .sort({_id : -1})
           .limit(query?.count ?? 10)
           .exec();
@@ -54,11 +58,11 @@ export default class PostMongo implements IPostDBGateway{
     // if 'ids' clause return posts with 'ids'
     if(query.id) 
       return await this.Model
-      .find({id : {$in : query.id.toString()}}, query.select)
+      .find({id : {$in : query.id.toString()}}, projection)
       .exec();
     // if 'count' only return last 'count' posts
     if(!query.id) 
-      return await this.Model.find({}, query.select)
+      return await this.Model.find({}, projection)
       .sort({_id : -1})
       .limit(query.count ?? 10)
       .exec();
