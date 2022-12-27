@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import {IAuthorDBGateway} from "../../../Core/Author/IDBGateway"
 import { QueryDTO } from "../../../Core/common/DTOs";
 import { RawAuthor } from "../../../Core/Author/rawAuthor";
-import { InvalidInputError } from "../../../Core/common/Errors";
+import { DBError, InvalidInputError } from "../../../Core/common/Errors";
 
 export default class AuthorMongo implements IAuthorDBGateway{
   
@@ -20,13 +20,37 @@ export default class AuthorMongo implements IAuthorDBGateway{
   private collection = "Authors";
   private Model = this.db.model(this.collection, this.schema, this.collection);
 
-  async getAuthor(params: QueryDTO<RawAuthor>): Promise<Partial<RawAuthor> | undefined> {
-    if(params.id && Array.isArray(params.id)) throw new InvalidInputError("too much arguments " + params.id.map(i => i.toString()).join(" "));
-    let res = await this.Model.findOne({id : params.id?.toString()}).exec();
+  async getAuthor(query: QueryDTO<RawAuthor>): Promise<Partial<RawAuthor> | undefined> {
+    if(query.id && Array.isArray(query.id)) throw new InvalidInputError("too much arguments " + query.id.map(i => i.toString()).join(" "));
+    if(!query.id) throw new DBError("you better give an ID or use getAuthors instead");
+    
+    let projection = query.select && query.select.join(" ");
+    let res = await this.Model.findOne({id : query.id?.toString()}, projection).exec();
     if(!res) return undefined;
-    return res;
+    return res.toObject();
   }
-  async getAuthors(params: QueryDTO<RawAuthor>) : Promise<Partial<RawAuthor>[] | undefined>{
+
+  async getAuthors(query: QueryDTO<RawAuthor>) : Promise<Partial<RawAuthor>[] | undefined>{
+    if(query.where){
+      if(query.where[1] == "="){
+        return await this.Model.find({[query.where[0]] : {$regex : new RegExp(query.where[2], "igm")}}, query.select)
+          .sort({_id : -1})
+          .limit(query?.count ?? 10)
+          .exec();
+      } else {
+        throw new DBError(`query ${query.where[1]} not implemented yet`);
+      }
+    }
+    if(query.id) 
+      return await this.Model
+      .find({id : {$in : query.id.toString()}}, query.select)
+      .exec();
+    // if 'count' only return last 'count' posts
+    if(!query.id) 
+      return await this.Model.find({}, query.select)
+      .sort({_id : -1})
+      .limit(query.count ?? 10)
+      .exec();
     throw new Error("Method not implemented.");
   }
 }
