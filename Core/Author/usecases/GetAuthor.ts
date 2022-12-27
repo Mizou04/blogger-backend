@@ -9,7 +9,7 @@ import { RawAuthor } from "../rawAuthor";
 
 
 
-export default class GetAuthor implements GetAuthorInputPort{
+export default class GetAuthor implements IGetAuthorInputPort{
   constructor
   (
     public outputPort: GetAuthorOutputPort,
@@ -40,7 +40,7 @@ export default class GetAuthor implements GetAuthorInputPort{
 
 }
 
-export interface GetAuthorInputPort extends InputPort<{id : UID}>{
+export interface IGetAuthorInputPort extends InputPort<{id : UID}>{
 }
 
 
