@@ -27,7 +27,7 @@ export default class AuthorMongo implements IAuthorDBGateway{
     let projection = query.select && query.select.join(" ");
     let res = await this.Model.findOne({id : query.id?.toString()}, projection).exec();
     if(!res) return undefined;
-    return res.toObject();
+    return res?.toObject();
   }
 
   async getAuthors(query: QueryDTO<RawAuthor>) : Promise<Partial<RawAuthor>[] | undefined>{
